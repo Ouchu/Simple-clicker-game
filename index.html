@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Clicker Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Clicker Challenge!</h1>
+        <div id="game-info">
+            <p>Score: <span id="score">0</span></p>
+            <p>Time Left: <span id="time">30</span>s</p>
+        </div>
+        <canvas id="gameCanvas" width="360" height="640"></canvas>
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <audio id="backgroundMusic" loop>
+        </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

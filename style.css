@@ -1,0 +1,55 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Hide scrollbars */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Full viewport height */
+    background-color: #282c34; /* Dark background */
+    color: #e0e0e0; /* Light text color */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-container {
+    text-align: center;
+    background-color: #3a3f47;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    color: #61dafb; /* A nice light blue */
+    margin-bottom: 15px;
+}
+
+#game-info p {
+    font-size: 1.2em;
+    margin: 5px 0;
+}
+
+canvas {
+    border: 2px solid #61dafb;
+    background-color: #000000; /* Black canvas background */
+    display: block; /* Remove extra space below canvas */
+    margin: 15px auto;
+}
+
+button {
+    background-color: #61dafb;
+    color: #282c34;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #21a1f1;
+}
+
+button:active {
+    background-color: #1a7bbd;
+}
