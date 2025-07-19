@@ -1,122 +1,114 @@
-// Game Elements
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const scoreElement = document.getElementById('score');
-const timeElement = document.getElementById('time');
-const startButton = document.getElementById('startButton');
-const backgroundMusic = document.getElementById('backgroundMusic');
+document.addEventListener('DOMContentLoaded', () => {
+    const gameCanvas = document.getElementById('gameCanvas');
+    const ctx = gameCanvas.getContext('2d');
+    const startButton = document.getElementById('startButton');
+    const scoreDisplay = document.getElementById('score');
+    const timeLeftDisplay = document.getElementById('time');
+    const backgroundMusic = document.getElementById('backgroundMusic');
 
-// Game Variables
-let score = 0;
-let timeLeft = 30; // seconds
-let gameInterval;
-let target = { x: 0, y: 0, radius: 30, color: 'red' };
-let gameRunning = false;
+    let score = 0;
+    let timeLeft = 30; // seconds
+    let gameInterval;
+    let targetInterval;
+    let target = { x: 0, y: 0, radius: 20 };
+    let gameActive = false;
 
-// --- Music Control ---
-// Important: Audio must be initiated by a user gesture.
-// We'll play it when the game starts.
+    // Function to set up a new random target
+    function setNewTarget() {
+        target.x = Math.random() * (gameCanvas.width - target.radius * 2) + target.radius;
+        target.y = Math.random() * (gameCanvas.height - target.radius * 2) + target.radius;
+    }
 
-// Function to play background music
-function playBackgroundMusic() {
-    // Set the source of the music. Make sure 'background_music.mp3' exists in the 'music' folder.
-    backgroundMusic.src = 'music/background_music.mp3';
-    backgroundMusic.volume = 0.5; // Set volume (0.0 to 1.0)
-    backgroundMusic.play().catch(error => {
-        console.error("Error playing music:", error);
-        // This error often means the browser prevented autoplay.
-        // User interaction (like clicking Start) should fix it.
+    // Function to draw the game elements
+    function drawGame() {
+        ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Clear canvas
+
+        // Draw target
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // Handle clicks on the canvas
+    gameCanvas.addEventListener('click', (event) => {
+        if (!gameActive) return;
+
+        const rect = gameCanvas.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const clickY = event.clientY - rect.top;
+
+        // Check if click is inside the target
+        const distance = Math.sqrt((clickX - target.x)**2 + (clickY - target.y)**2);
+        if (distance < target.radius) {
+            score++;
+            scoreDisplay.textContent = score;
+            setNewTarget(); // Move target to a new position
+        }
     });
-}
 
-// Function to stop background music
-function stopBackgroundMusic() {
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0; // Rewind to start
-}
-
-// --- Game Logic ---
-
-// Function to set a new target position
-function setNewTarget() {
-    target.x = Math.random() * (canvas.width - target.radius * 2) + target.radius;
-    target.y = Math.random() * (canvas.height - target.radius * 2) + target.radius;
-}
-
-// Function to draw game elements
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-
-    // Draw target
-    ctx.beginPath();
-    ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
-    ctx.fillStyle = target.color;
-    ctx.fill();
-    ctx.closePath();
-}
-
-// Update game state
-function updateGame() {
-    if (!gameRunning) return;
-
-    timeLeft--;
-    timeElement.textContent = timeLeft;
-
-    if (timeLeft <= 0) {
-        endGame();
+    // Game loop for drawing
+    function gameLoop() {
+        drawGame();
+        if (gameActive && timeLeft > 0) {
+            requestAnimationFrame(gameLoop);
+        }
     }
-}
 
-// Initialize and start the game
-function startGame() {
-    score = 0;
-    timeLeft = 30;
-    gameRunning = true;
-    scoreElement.textContent = score;
-    timeElement.textContent = timeLeft;
-    startButton.style.display = 'none'; // Hide start button
+    // Start the game
+    function startGame() {
+        if (gameActive) return; // Prevent multiple starts
 
-    setNewTarget(); // Place initial target
-    draw(); // Draw initial state
+        score = 0;
+        timeLeft = 30;
+        scoreDisplay.textContent = score;
+        timeLeftDisplay.textContent = timeLeft;
+        gameActive = true;
+        startButton.style.display = 'none'; // Hide the start button
 
-    // Start game timer
-    gameInterval = setInterval(updateGame, 1000); // Update every second
+        setNewTarget(); // Set initial target
+        gameLoop(); // Start drawing
 
-    playBackgroundMusic(); // Start playing music when game begins
-}
+        // Start background music
+        backgroundMusic.play().catch(error => {
+            console.error("Error playing music:", error);
+            // This error often happens if the user hasn't interacted with the page yet.
+            // Modern browsers require user interaction before autoplaying media.
+            // We can add a fallback or a play button.
+        });
 
-// End the game
-function endGame() {
-    gameRunning = false;
-    clearInterval(gameInterval); // Stop game timer
-    startButton.textContent = 'Play Again';
-    startButton.style.display = 'block'; // Show start button
-    stopBackgroundMusic(); // Stop music when game ends
-    alert(`Game Over! Your score: ${score}`);
-}
+        gameInterval = setInterval(() => {
+            timeLeft--;
+            timeLeftDisplay.textContent = timeLeft;
 
-// Handle clicks on the canvas
-canvas.addEventListener('click', (event) => {
-    if (!gameRunning) return;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
 
-    const rect = canvas.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const clickY = event.clientY - rect.top;
-
-    const distance = Math.sqrt(
-        Math.pow(clickX - target.x, 2) + Math.pow(clickY - target.y, 2)
-    );
-
-    if (distance < target.radius) {
-        score += 1;
-        scoreElement.textContent = score;
-        setNewTarget(); // Move target
-        draw(); // Redraw target
+        // Optional: Move target periodically (e.g., every 1 second)
+        targetInterval = setInterval(() => {
+            if (gameActive) {
+                setNewTarget();
+            }
+        }, 1000); // Target moves every 1 second
     }
+
+    // End the game
+    function endGame() {
+        gameActive = false;
+        clearInterval(gameInterval);
+        clearInterval(targetInterval);
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0; // Rewind music
+        alert(`Game Over! Your score: ${score}`);
+        startButton.style.display = 'block'; // Show the start button again
+    }
+
+    // Event listener for the start button
+    startButton.addEventListener('click', startGame);
+
+    // Initial setup (draw game elements once)
+    drawGame();
 });
-
-// Event listener for the start button
-startButton.addEventListener('click', startGame);
-
-// Initial draw to show the canvas before starting
-draw();
